@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Loading Game 2</title>
+	<link rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body onload="animate()">
+	<div class="content-game">
+		<center><h2>Intenta encontrar la bolita blanca</h2></center>
+		<div class="content-circles">
+			<div class="circle">
+				<div class="obj" id="objetive"></div>
+				<div class="draw-circle"></div>
+			</div>
+			<div class="circle">
+				<div class="draw-circle"></div>
+			</div>			
+			<div class="circle">
+				<div class="draw-circle"></div>
+			</div>
+		</div>
+		<center>
+			<button id="idbtn" onclick="process_begin()" style="display: none;">Nuevo juego</button>
+		</center>
+	</div>
+	<script type="text/javascript">
+		let activar_game=false;
+		//POSIBLES POSICIONES DE LOS CIRCULOS
+		let ar_pos=['0','calc(100%/3)','calc(100%*2/3)'];
+		function animate(){
+			process_begin();
+		}
+		function process_begin(){
+			document.getElementById("idbtn").style.display="none";
+			activar_game=false;
+			let ar_circles=document.getElementsByClassName("draw-circle");
+			for (var i = 0; i < ar_circles.length; i++) {
+				ar_circles[i].style.background="#00ffb3";
+			}
+			//ESCONDE EL PUNTO BLANCO
+			let obj=document.getElementById("objetive");
+			obj.style.top="50px";
+			//logica para mover los circulos verdes
+			let ar_val=[];
+			let ar_dom=document.getElementsByClassName("circle");
+			//Movemos los circulos cuando se esconde el circulo blaco
+			setTimeout(function(){
+				for (var i = 0; i < ar_dom.length; i++) {
+					let pos_mov=i;
+					let validar=true;
+					while(validar){
+						if (i!=ar_dom.length-1) {
+							//SE BUSCA MOVER CADA CIRCULO VERDE A UNA NUEVA POSICION DIFERENTE A LA INICIAL
+							pos_mov=Math.round(Math.random()*(ar_pos.length-1));
+							let contador=0;
+							for (var j = 0; j < ar_val.length; j++) {
+								if(ar_val[j]==pos_mov){
+									contador++;
+								}
+							}
+							if (contador==0 && pos_mov!=i) {
+								validar=false;
+								ar_val.push(pos_mov);
+							}
+						}else{
+							//CUANDO SE LLEGA A MOVER EL ULTIMO CIRCULO, HAY CASOS EN EL QUE EL RANDOM DEMORA EN ENCONTRAR EL LUGAR CORRECTO, ASI QUE USAMOS ESTA PARTE DE LA FUNCION
+							let j=0;
+							let validar2=true;
+							while(validar2){
+								let contador=0;
+								for (var k = 0; k < ar_val.length; k++) {
+									if(ar_val[k]==j){
+										contador++;
+									}
+								}
+								if (contador==0) {
+									pos_mov=j;
+									ar_val.push(j);
+									validar2=false;
+								}
+								j++;
+							}
+							validar=false;
+						}
+					}
+					ar_dom[i].style.left=ar_pos[pos_mov];
+				}
+				let ar_aux=[];
+				//HACEMOS QUE EL ARRAY DE POSICIONES INICIAL CAMBIE PARA QUE NO REPITAN LAS POSICIONES LOS CIRCULOS VERDES 
+				for (var i = 0; i < ar_val.length; i++) {
+					ar_aux.push(ar_pos[ar_val[i]]);
+				}
+				ar_pos=ar_aux;
+				activar_game=true;
+			},2000);
+		}
+
+		//PARA RECONOCER LOS CLICKS EN LOS CIRCULOS VERDES
+		function validar_punto(){
+			if (activar_game) {
+				let obj=this.getElementsByClassName("obj");
+				if (obj.length==1) {
+					alert("Ganaste!");
+					obj[0].style.top="-30px";
+					document.getElementById("idbtn").style.display="block";
+					activar_game=false;
+				}else{
+					//SE PINTA DE ROJO EL CIRCULO FALLIDO
+					this.getElementsByClassName("draw-circle")[0].style.background="#ce1510";
+				}
+			}
+		}
+
+		let ar=document.getElementsByClassName("circle");
+		for (var i = 0; i < ar.length; i++) {
+			ar[i].addEventListener('click',validar_punto,false);
+		}
+	</script>
+</body>
+</html>
